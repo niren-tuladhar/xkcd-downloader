@@ -1,44 +1,38 @@
-import sys, bs4, requests, urllib
+import sys
+import bs4
+import requests
+import urllib
 
-#pass URL
-#check url exists
-    #get image
-    #get title
-    #save filename with the title
-#else end program
-def getImageUrl(xkcdUrl):
+def main():
+    comicNumber = 1
+    imageExists = True
+    while imageExists:
+        try:
+            xkcdUrl = 'http://xkcd.com/' + str(comicNumber)
+            imgDet = getImgDetails(xkcdUrl)
+            saveImage(imgDet['imgUrl'], imgDet['fileName'], str(comicNumber))
+            comicNumber = comicNumber + 1
+        except:
+            sys.exit()
+
+
+#Returns the url and filename of the image
+def getImgDetails(xkcdUrl):
     res = requests.get(xkcdUrl)
-    soup = bs4.BeautifulSoup(res.text)
+    soup = bs4.BeautifulSoup(res.text, 'html.parser')
     element = str(soup.select('#comic > img'))
-    temp = element.split('"')[1::2]
-    url = str(temp[1])
-    return url[2:]
+    imgDet = {'imgUrl': element.split('"')[3][2:], 'fileName': element.split('"')[1]}
+    return imgDet
 
 
-def getImageTitle(xkcdUrl):
-    res = requests.get(xkcdUrl)
-    soup = bs4.BeautifulSoup(res.text)
-    element = soup.select('#ctitle')
-    return element[0].text
 
-def saveImage(imageUrl, fileName, comicNumber):
-    urllib.request.urlretrieve('http://' + imageUrl, comicNumber + '-' + fileName + '.jpg')
+#Saves image in the directory of the script
+def saveImage(imgUrl, fname, comicNumber):
+    urllib.request.urlretrieve('http://' + imgUrl, comicNumber + '-' + fname + '.jpg')
 
-    
-comicNumber = 1767
-imageExists = True
-while imageExists:
-#for comicNumber in range(1, 6):
-    try:
-        xkcdUrl = 'http://xkcd.com/' + str(comicNumber)
-        imageUrl = getImageUrl(xkcdUrl)
-        fileName = getImageTitle(xkcdUrl)
-        saveImage(imageUrl, fileName, str(comicNumber))
-        comicNumber = comicNumber + 1
-    except:
-        sys.exit() 
-    
-      
+   
+if __name__ == '__main__':
+    main()
 
 
 
